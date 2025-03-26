@@ -1,42 +1,42 @@
+
 services:
-  api-service:
+  api:
     container_name: api_cardapiodigital
-    build:
-      context: ../cardapio_digital
+    build: .
     ports:
       - "8001:8001"
     networks:
       - api-network
     volumes:
-      - ../cardapio_digital:/code
+      - .:/code
     environment:
-      - DJANGO_SETTINGS_MODULE=cardapio_digital.settings
-      - DATABASE_URL=postgres://postgres:postgres@db_api_cardapio:5432/postgres
-      - CREATE_SUPERUSER=True
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     depends_on:
-      db_api_cardapio:
+      db:
         condition: service_healthy
 
-  db_api_cardapio:
-    container_name: db_api_cardapio
+  db:
+    container_name: db_cardapiodigital
     image: postgres:13
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
     volumes:
-      - postgres_data_api:/var/lib/postgresql/data/
+      - postgres_data:/var/lib/postgresql/data/
     networks:
       - api-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d db"]
-      interval: 10s
-      timeout: 5s
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
       retries: 5
 
 networks:
   api-network:
-    external: true
 
 volumes:
-  postgres_data_api:
+  postgres_data:

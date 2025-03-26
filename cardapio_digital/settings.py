@@ -37,6 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'rest_framework',
+    'product',
+    'category',
+    'establishment',
 ]
 
 MIDDLEWARE = [
@@ -79,8 +84,8 @@ DATABASES = {
         "NAME": os.getenv("POSTGRES_DB", "postgres"),
         "USER": os.getenv("POSTGRES_USER", "postgres"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD", "postgres"),
-        "HOST": os.getenv("POSTGRES_HOST", "db_api_cardapio"),
-        "PORT": os.getenv("POSTGRES_PORT", 5432),
+        "HOST": os.getenv("POSTGRES_HOST", "db"),
+        "PORT": os.getenv("POSTGRES_PORT", "5432"),
     }
 }
 
