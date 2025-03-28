@@ -54,3 +54,43 @@ class ProductViewSet(viewsets.ModelViewSet):
         serializer = ProductSerializer(products, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['put'])
+    def update_product(self, request):
+        product_id = request.data.get('id')
+        if not product_id:
+            return Response(
+                {"error": "Você deve fornecer o parâmetro 'id'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            product = Product.objects.get(id=product_id)
+            serializer = ProductSerializer(product, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Product.DoesNotExist:
+            return Response(
+                {"error": "Produto não encontrado."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(detail=False, methods=['post'])
+    def delete_product(self, request):
+        product_id = request.data.get('id')
+        if not product_id:
+            return Response(
+                {"error": "Você deve fornecer o parâmetro 'id'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            product = Product.objects.get(id=product_id)
+            product.delete()
+            return Response({"message": "Produto deletado com sucesso."}, status=status.HTTP_204_NO_CONTENT)
+        except Product.DoesNotExist:
+            return Response(
+                {"error": "Produto não encontrado."},
+                status=status.HTTP_404_NOT_FOUND
+            )
