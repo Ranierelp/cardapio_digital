@@ -11,6 +11,7 @@ class EstablishmentAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at', 'deleted_at')
     list_editable = ('is_active',)
     actions = ['ativar_estabelecimentos', 'desativar_estabelecimentos']
+    exclude = ('code',)
 
     fieldsets = (
         ('Informações Básicas', {

@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 from category.models import Category
-
+from establishment.models import Establishment
 class Base(models.Model):
     code = models.UUIDField("Código uuid4", default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField('Created At', auto_now_add=True)
@@ -16,6 +16,7 @@ class Product(Base):
     quantity = models.PositiveIntegerField('Quantity', null=True, blank=True)
     photo = models.ImageField('Photo', upload_to='products_img', null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    establishment = models.ForeignKey(Establishment, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         verbose_name = 'Product'
