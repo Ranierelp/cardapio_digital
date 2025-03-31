@@ -47,9 +47,9 @@ export function Sidebar() {
                 </Button>
 
                 <nav className="flex flex-col items-start gap-4 px-2 py-5">
-                    <Link href='#' className="flex h-9 w-9 items-center justify-center bg-primary text-primary-foreground rounded-full">
+                    {/* <Link href='#' className="flex h-9 w-9 items-center justify-center bg-primary text-primary-foreground rounded-full">
                         <Package className="h-4 w-4"/>
-                    </Link>
+                    </Link> */}
                     
                     {[
                         { href: "/", icon: Home, label: "Inicio" },
