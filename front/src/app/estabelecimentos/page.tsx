@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -19,51 +19,82 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 
+import { addEstabelecimento, getEstabelecimentos } from "../services/api";
+
 // Esquema de validação
 const formSchema = z.object({
   name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
-  username: z.string().min(3, "O usuário deve ter pelo menos 3 caracteres"),
-  description: z.string().min(5, "A descrição deve ter pelo menos 5 caracteres"),
-  price: z.string().min(1, "O valor deve ser maior que 0"),
-  quantity: z.string().min(1, "O produto deve ter pelo menos 1 item"),
-  photo: z.instanceof(File).optional(), // O campo de foto será um arquivo
-  category: z.string().min(3, "O produto deve ter uma categoria"),
+  email: z.string().min(3, "O e-mail deve ter pelo menos 3 caracteres"),
+  phone: z.string().min(5, "O telefone deve ter pelo menos 5 caracteres"),
+  cnpj: z.string().min(3, "O CNPJ deve ter pelo menos 3 caracteres"),
 });
 
 export default function Produtos() {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [estabelecimentos, setEstabelecimentos] = useState([]);
+
+  // Buscar estabelecimentos na API
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const data = await getEstabelecimentos();
+        setEstabelecimentos(data);
+      } catch (error) {
+        console.error("Erro ao buscar estabelecimentos:", error);
+      }
+    }
+    fetchData();
+  }, []);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      username: "",
-      description: "",
-      price: "",
-      quantity: "",
-      photo: undefined,
-      category: "",
+      email: "",
+      phone: "",
+      cnpj: "",
     },
   });
 
-  const onSubmit = (data: any) => {
-    console.log("Dados enviados:", data);
-    alert("Produto adicionado com sucesso!");
-  };
-
-  // Função para processar o upload de imagem
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      form.setValue("photo", file);
-      setPreviewImage(URL.createObjectURL(file)); // Cria uma URL temporária para preview
+  const onSubmit = async (data: any) => {
+    console.log("Dados do formulário:", data); // Verificar os dados antes do envio
+  
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/v1/estabelecimento/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", // Garantir que estamos enviando JSON
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          cnpj: data.cnpj,
+        }),
+      });
+  
+      if (response.ok) {
+        alert("Produto adicionado com sucesso!");
+  
+        // Atualiza a lista de estabelecimentos
+        const updatedData = await getEstabelecimentos();
+        setEstabelecimentos(updatedData);
+      } else {
+        const errorData = await response.json();
+        console.error("Erro ao enviar os dados:", errorData);
+        alert("Erro ao adicionar produto!");
+      }
+    } catch (error: any) {
+      console.error("Erro inesperado ao enviar os dados:", error.message);
+      alert("Erro ao adicionar produto!");
     }
   };
+  
 
   return (
-    <div className="sm:ml-45 p-4">
-      <h1 className="text-2xl font-bold mb-4">Produtos</h1>
-
+    <div className="sm:ml-25 sm:mr-12 sm:mt-15  p-4">
+      <div className="flex flex-row justify-between">
+        <h1 className="text-2xl font-bold mb-4">Estabelecimentos</h1>
       <Dialog>
         <DialogTrigger asChild>
           <Button variant="outline">Adicionar Produtos</Button>
@@ -78,7 +109,6 @@ export default function Produtos() {
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-
               <FormField
                 control={form.control}
                 name="name"
@@ -95,12 +125,12 @@ export default function Produtos() {
 
               <FormField
                 control={form.control}
-                name="username"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Usuário</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
-                        <Input placeholder="Digite o nome de usuário" {...field} />
+                      <Input type="email" placeholder="Digite o e-mail" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -109,12 +139,12 @@ export default function Produtos() {
 
               <FormField
                 control={form.control}
-                name="description"
+                name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descrição</FormLabel>
+                    <FormLabel>Telefone</FormLabel>
                     <FormControl>
-                        <Textarea placeholder="Digite a descrição do produto" {...field} />
+                      <Input placeholder="Digite o telefone" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -123,63 +153,17 @@ export default function Produtos() {
 
               <FormField
                 control={form.control}
-                name="price"
+                name="cnpj"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Preço</FormLabel>
+                    <FormLabel>CNPJ</FormLabel>
                     <FormControl>
-                        <Input type="number" placeholder="Digite o preço" {...field} />
+                      <Input placeholder="Digite o CNPJ" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-
-              <FormField
-                control={form.control}
-                name="quantity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Quantidade</FormLabel>
-                    <FormControl>
-                        <Input type="number" placeholder="Digite a quantidade" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Categoria</FormLabel>
-                    <FormControl>
-                        <Input placeholder="Digite a categoria" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormItem>
-                <FormLabel>Foto do Produto</FormLabel>
-                <FormControl>
-                    <Input type="file" accept="image/*" onChange={handleImageUpload} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-
-              {previewImage && (
-                <div className="mt-2">
-                    <p className="text-sm text-gray-500">Pré-visualização:</p>
-                    <img src={previewImage} alt="Preview" className="w-full max-h-40 object-cover rounded-md shadow-md" />
-                </div>
-              )}
-
 
               <DialogFooter>
                 <Button type="submit">Salvar Produto</Button>
@@ -188,8 +172,12 @@ export default function Produtos() {
           </Form>
         </DialogContent>
       </Dialog>
+      </div>
 
-      <Tables />
+    <div className="retangulo">
+      {/* Passa os estabelecimentos para a Tabela */}
+      <Tables dados={estabelecimentos} />
+    </div>
     </div>
   );
 }
