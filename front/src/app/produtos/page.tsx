@@ -128,133 +128,121 @@ export default function Produtos() {
   const headersProdutos = ["ID", "Nome", "Preço", "Quantidade", "Categoria", "Estabelecimento"];
 
   return (
-    <div className="sm:ml-45 p-4">
-      <h1 className="text-2xl font-bold mb-4">Produtos</h1>
-
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button variant="outline">Adicionar Produtos</Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[725px]">
-          <DialogHeader>
-            <DialogTitle>Adicionar Produtos</DialogTitle>
-            <DialogDescription>
-              Insira os detalhes do produto abaixo e clique em salvar.
-            </DialogDescription>
-          </DialogHeader>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Digite o nome" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+    <div className="sm:ml-25 sm:mr-12 sm:mt-15  p-4">
+      <div className="flex flex-row justify-between">
+        <h1 className="text-2xl font-bold mb-4">Produtos</h1>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline">Adicionar Produtos</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[725px]">
+            <DialogHeader>
+              <DialogTitle>Adicionar Produtos</DialogTitle>
+              <DialogDescription>
+                Insira os detalhes do produto abaixo e clique em salvar.
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Digite o nome" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>description</FormLabel>
+                      <FormControl>
+                          <Input placeholder="Digite uma description" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>price</FormLabel>
+                      <FormControl>
+                          <Textarea type="number" placeholder="Digite o price do produto" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="quantity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>quantity</FormLabel>
+                      <FormControl>
+                          <Input type="number" placeholder="Digite o quantity" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* <FormField
+                  control={form.control}
+                  name="establishment"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>establishment</FormLabel>
+                      <FormControl>
+                          <Input type="number" placeholder="Digite a establishment" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                /> */}
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Categoria</FormLabel>
+                      <FormControl>
+                          <Input placeholder="Digite a categoria" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormItem>
+                  <FormLabel>Foto do Produto</FormLabel>
+                  <FormControl>
+                      <Input type="file" accept="image/*" onChange={handleImageUpload} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+                {previewImage && (
+                  <div className="mt-2">
+                      <p className="text-sm text-gray-500">Pré-visualização:</p>
+                      <img src={previewImage} alt="Preview" className="w-full max-h-40 object-cover rounded-md shadow-md" />
+                  </div>
                 )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>description</FormLabel>
-                    <FormControl>
-                        <Input placeholder="Digite uma description" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>price</FormLabel>
-                    <FormControl>
-                        <Textarea type="number" placeholder="Digite o price do produto" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="quantity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>quantity</FormLabel>
-                    <FormControl>
-                        <Input type="number" placeholder="Digite o quantity" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-
-              {/* <FormField
-                control={form.control}
-                name="establishment"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>establishment</FormLabel>
-                    <FormControl>
-                        <Input type="number" placeholder="Digite a establishment" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
-
-
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Categoria</FormLabel>
-                    <FormControl>
-                        <Input placeholder="Digite a categoria" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormItem>
-                <FormLabel>Foto do Produto</FormLabel>
-                <FormControl>
-                    <Input type="file" accept="image/*" onChange={handleImageUpload} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-
-              {previewImage && (
-                <div className="mt-2">
-                    <p className="text-sm text-gray-500">Pré-visualização:</p>
-                    <img src={previewImage} alt="Preview" className="w-full max-h-40 object-cover rounded-md shadow-md" />
-                </div>
-              )}
-
-
-              <DialogFooter>
-                <Button type="submit">Salvar Produto</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+                <DialogFooter>
+                  <Button type="submit">Salvar Produto</Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      </div>
 
       {/* Passa os dados e o cabeçalho para a Tabela */}
       <div>
