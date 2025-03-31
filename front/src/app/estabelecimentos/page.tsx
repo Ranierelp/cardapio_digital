@@ -17,8 +17,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-
 import { addEstabelecimento, getEstabelecimentos } from "../services/api";
 
 // Esquema de validação
@@ -38,7 +36,16 @@ export default function Produtos() {
     async function fetchData() {
       try {
         const data = await getEstabelecimentos();
-        setEstabelecimentos(data);
+        
+        const filteredData = data.map((estabelecimento) => ({
+          id: estabelecimento.id,
+          name: estabelecimento.name,
+          email: estabelecimento.email,
+          phone: estabelecimento.phone,
+          cnpj: estabelecimento.cnpj,
+        }));
+
+        setEstabelecimentos(filteredData);
       } catch (error) {
         console.error("Erro ao buscar estabelecimentos:", error);
       }
@@ -90,18 +97,18 @@ export default function Produtos() {
     }
   };
   
-
+  const headersEstabelecimentos = ["ID", "Nome", "Email", "Telefone", "CNPJ"];
   return (
     <div className="sm:ml-25 sm:mr-12 sm:mt-15  p-4">
       <div className="flex flex-row justify-between">
         <h1 className="text-2xl font-bold mb-4">Estabelecimentos</h1>
       <Dialog>
         <DialogTrigger asChild>
-          <Button variant="outline">Adicionar Produtos</Button>
+          <Button variant="outline">Adicionar Estabelecimento</Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[725px]">
           <DialogHeader>
-            <DialogTitle>Adicionar Produtos</DialogTitle>
+            <DialogTitle>Adicionar Estabelecimento</DialogTitle>
             <DialogDescription>
               Insira os detalhes do produto abaixo e clique em salvar.
             </DialogDescription>
@@ -114,7 +121,7 @@ export default function Produtos() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nome</FormLabel>
+                    <FormLabel>Empresa</FormLabel>
                     <FormControl>
                       <Input placeholder="Digite o nome" {...field} />
                     </FormControl>
@@ -176,7 +183,7 @@ export default function Produtos() {
 
     <div className="retangulo">
       {/* Passa os estabelecimentos para a Tabela */}
-      <Tables dados={estabelecimentos} />
+      <Tables dados={estabelecimentos} headers={headersEstabelecimentos}/>
     </div>
     </div>
   );

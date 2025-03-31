@@ -1,54 +1,118 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
+import { Tables } from "@/components/table"; // Tabela importada corretamente
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// Esquema de validação
+import { getProdutos } from "../services/api";
+
+// Exemplo de listas de opções para categoria e estabelecimento
+const categories = ["Categoria 1", "Categoria 2", "Categoria 3"];
+const establishments = ["Estabelecimento 1", "Estabelecimento 2", "Estabelecimento 3"];
+
 const formSchema = z.object({
   name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
-  username: z.string().min(3, "O usuário deve ter pelo menos 3 caracteres"),
   description: z.string().min(5, "A descrição deve ter pelo menos 5 caracteres"),
-  price: z.string().min(1, "O valor deve ser maior que 0"),
-  quantity: z.string().min(1, "O produto deve ter pelo menos 1 item"),
+  price: z.string().refine((value) => !isNaN(parseFloat(value)) && parseFloat(value) > 0, {
+    message: "O valor deve ser um número válido e maior que 0",
+  }),
+  quantity: z.string().refine((value) => Number.isInteger(Number(value)) && parseInt(value) > 0, {
+    message: "A quantidade deve ser um número inteiro maior que 0",
+  }),
   photo: z.instanceof(File).optional(), // O campo de foto será um arquivo
-  category: z.string().min(3, "O produto deve ter uma categoria"),
+  category: z.string().min(3, "O produto deve ter uma categoria").refine((value) => categories.includes(value), {
+    message: "Categoria inválida",
+  }),
+  // establishment: z.string().min(3, "O produto deve ter um estabelecimento").refine((value) => establishments.includes(value), {
+  //   message: "Estabelecimento inválido",
+  // }),
 });
 
 export default function Produtos() {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [produtos, setProdutos] = useState<any[]>([]); // Defina o tipo de dados para `produtos`
+  
+  // Buscar produtos da API ao carregar o componente
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const data = await getProdutos();
+        
+        // Filtrando os dados para incluir apenas os campos necessários
+        const filteredData = data.map((produto) => ({
+          id: produto.id,
+          name: produto.name,
+          price: produto.price,
+          quantity: produto.quantity,
+          category: produto.category,
+          establishment: produto.establishment,
+        }));
+  
+        setProdutos(filteredData); // Atualiza o estado com os dados filtrados
+      } catch (error) {
+        console.error("Erro ao buscar produtos:", error);
+      }
+    }
+    fetchData();
+  }, []);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      username: "",
       description: "",
       price: "",
       quantity: "",
       photo: undefined,
       category: "",
+      // establishment: "",
     },
   });
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     console.log("Dados enviados:", data);
-    alert("Produto adicionado com sucesso!");
+    
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/v1/produto/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", // Garantir que estamos enviando JSON
+        },
+        body: JSON.stringify({
+          name: data.name,
+          description: data.description,
+          price: data.price,
+          quantity: data.quantity,
+          photo: data.photo,
+          category: data.category,
+          // establishment: data.establishment,
+
+        }),
+      });
+      if (response.ok) {
+        alert("Produto adicionado com sucesso!");
+  
+        // Atualiza a lista de Produtos
+        const updatedData = await getProdutos();
+        setProdutos(updatedData);
+      } else {
+        const errorData = await response.json();
+        console.error("Erro ao enviar os dados:", errorData);
+        alert("Erro ao adicionar produto!");
+      }
+    } catch (error: any) {
+      console.error("Erro inesperado ao enviar os dados:", error.message);
+      alert("Erro ao adicionar produto!");
+    }
   };
 
   // Função para processar o upload de imagem
@@ -59,6 +123,9 @@ export default function Produtos() {
       setPreviewImage(URL.createObjectURL(file)); // Cria uma URL temporária para preview
     }
   };
+
+  // Defina o cabeçalho da tabela dinamicamente
+  const headersProdutos = ["ID", "Nome", "Preço", "Quantidade", "Categoria", "Estabelecimento"];
 
   return (
     <div className="sm:ml-45 p-4">
@@ -95,26 +162,12 @@ export default function Produtos() {
 
               <FormField
                 control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Usuário</FormLabel>
-                    <FormControl>
-                        <Input placeholder="Digite o nome de usuário" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descrição</FormLabel>
+                    <FormLabel>description</FormLabel>
                     <FormControl>
-                        <Textarea placeholder="Digite a descrição do produto" {...field} />
+                        <Input placeholder="Digite uma description" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -126,29 +179,43 @@ export default function Produtos() {
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Preço</FormLabel>
+                    <FormLabel>price</FormLabel>
                     <FormControl>
-                        <Input type="number" placeholder="Digite o preço" {...field} />
+                        <Textarea type="number" placeholder="Digite o price do produto" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
 
               <FormField
                 control={form.control}
                 name="quantity"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Quantidade</FormLabel>
+                    <FormLabel>quantity</FormLabel>
                     <FormControl>
-                        <Input type="number" placeholder="Digite a quantidade" {...field} />
+                        <Input type="number" placeholder="Digite o quantity" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+
+              {/* <FormField
+                control={form.control}
+                name="establishment"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>establishment</FormLabel>
+                    <FormControl>
+                        <Input type="number" placeholder="Digite a establishment" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              /> */}
 
 
               <FormField
@@ -188,6 +255,13 @@ export default function Produtos() {
           </Form>
         </DialogContent>
       </Dialog>
+
+      {/* Passa os dados e o cabeçalho para a Tabela */}
+      <div>
+        <div className="retangulo">
+          <Tables dados={produtos} headers={headersProdutos} />
+        </div>
+      </div>
     </div>
   );
 }

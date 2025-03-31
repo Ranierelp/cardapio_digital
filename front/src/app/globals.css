@@ -131,3 +131,10 @@
 .font-lactosa {
   font-family: 'Lactosa', sans-serif;
 }
+
+.retangulo{
+  background-color: transparent;
+  box-shadow: 0px 4px 5px 0px rgba(129, 129, 129, 0.26);
+  padding: 0.8rem;
+  border-radius: 0.625rem;
+}
